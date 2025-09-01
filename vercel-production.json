@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "name": "goldium-september",
+  "alias": ["goldium-september.vercel.app"],
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next@latest"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_SOLANA_NETWORK": "mainnet-beta",
+    "NEXT_PUBLIC_SOLANA_RPC_URL": "https://api.mainnet-beta.solana.com"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "NEXT_PUBLIC_SOLANA_NETWORK": "mainnet-beta",
+      "NEXT_PUBLIC_SOLANA_RPC_URL": "https://api.mainnet-beta.solana.com"
+    }
+  },
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "regions": ["sin1", "hnd1", "iad1"],
+  "framework": "nextjs"
+}
