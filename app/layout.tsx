@@ -6,6 +6,7 @@ import "@solana/wallet-adapter-react-ui/styles.css"
 import "../styles/wallet-modal.css"
 import ClientProviders from "@/components/ClientProviders"
 import ClientInitializer from "@/components/ClientInitializer"
+import DeploymentForce from "./DEPLOYMENT_FORCE"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className={`${sora.variable} ${inter.variable} font-sans bg-black text-white`}>
         <ClientProviders>
           <ClientInitializer />
+          <DeploymentForce />
           {children}
         </ClientProviders>
       </body>
