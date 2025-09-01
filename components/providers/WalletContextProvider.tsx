@@ -10,7 +10,25 @@ import {
   useWallet as useSolanaWallet,
 } from "@solana/wallet-adapter-react"
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui"
-import { PhantomWalletAdapter, SolflareWalletAdapter, TorusWalletAdapter } from "@solana/wallet-adapter-wallets"
+import { 
+  PhantomWalletAdapter, 
+  SolflareWalletAdapter, 
+  TorusWalletAdapter
+} from "@solana/wallet-adapter-wallets"
+
+// Import additional wallets with error handling
+let BackpackWalletAdapter: any = null
+let LedgerWalletAdapter: any = null
+let SlopeWalletAdapter: any = null
+
+try {
+  const walletAdapters = require("@solana/wallet-adapter-wallets")
+  BackpackWalletAdapter = walletAdapters.BackpackWalletAdapter
+  LedgerWalletAdapter = walletAdapters.LedgerWalletAdapter  
+  SlopeWalletAdapter = walletAdapters.SlopeWalletAdapter
+} catch (error) {
+  console.warn("Some wallet adapters not available:", error)
+}
 import { useToast } from "@/components/ui/use-toast"
 import { useNetwork } from "@/components/providers/NetworkContextProvider"
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
@@ -227,10 +245,37 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
   }, [network])
 
   // Initialize wallet adapters
-  const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter(), new TorusWalletAdapter()],
-    [walletNetwork],
-  )
+  const wallets = useMemo(() => {
+    const adapters = []
+    
+    try {
+      // Always include core adapters
+      adapters.push(new PhantomWalletAdapter())
+      adapters.push(new SolflareWalletAdapter())
+      adapters.push(new TorusWalletAdapter())
+      
+      // Add optional adapters if available
+      if (BackpackWalletAdapter) {
+        adapters.push(new BackpackWalletAdapter())
+      }
+      if (LedgerWalletAdapter) {
+        adapters.push(new LedgerWalletAdapter())
+      }
+      if (SlopeWalletAdapter) {
+        adapters.push(new SlopeWalletAdapter())
+      }
+      
+      console.log("Initialized wallet adapters:", adapters.map(a => a.name))
+      return adapters
+    } catch (error) {
+      console.error("Error initializing wallet adapters:", error)
+      // Fallback to basic adapters only
+      return [
+        new PhantomWalletAdapter(),
+        new SolflareWalletAdapter()
+      ]
+    }
+  }, [walletNetwork])
 
   // Expose wallet context
   const value = {
@@ -241,8 +286,18 @@ export function WalletContextProvider({ children }: { children: React.ReactNode 
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider value={value}>{children}</WalletModalProvider>
+      <WalletProvider 
+        wallets={wallets} 
+        autoConnect={false}
+        onError={(error) => {
+          console.error("Wallet Provider Error:", error)
+        }}
+      >
+        <WalletModalProvider>
+          <WalletContext.Provider value={value}>
+            {children}
+          </WalletContext.Provider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   )

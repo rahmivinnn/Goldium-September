@@ -113,9 +113,9 @@ export function isBrowserSupported(): boolean {
 }
 
 /**
- * Get recommended wallet for current browser
+ * Get recommended wallet for current browser based on browser compatibility
  */
-export function getRecommendedWallet(): string {
+export function getBrowserRecommendedWallet(): string {
   const { recommendedWallet } = detectBrowser()
   return recommendedWallet
 }

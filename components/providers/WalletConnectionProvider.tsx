@@ -5,7 +5,8 @@ import { useWallet } from "@solana/wallet-adapter-react"
 import { useToast } from "@/components/ui/use-toast"
 import { detectBrowser } from "@/utils/browser-detection"
 import { isWalletInstalled, getRecommendedWallet } from "@/utils/wallet-detection"
-import { isBrowserSupported } from "@/utils/browser-detection"
+import { isBrowserSupported, getBrowserRecommendedWallet } from "@/utils/browser-detection"
+import { parseWalletError } from "@/utils/connection-error"
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected" | "error"
 
@@ -37,22 +38,27 @@ export function WalletConnectionProvider({ children }: { children: ReactNode }) 
       // If walletName is provided, select the wallet first
       if (walletName && wallets) {
         // Find the wallet adapter by name from the existing wallets
+        const normalizedWalletName = walletName.toLowerCase()
         const selectedWallet = wallets.find(w => 
-          w.adapter.name.toLowerCase().includes(walletName.toLowerCase())
+          w.adapter.name.toLowerCase().includes(normalizedWalletName) ||
+          normalizedWalletName.includes(w.adapter.name.toLowerCase())
         )
         
         if (selectedWallet) {
+          console.log(`Selecting wallet: ${selectedWallet.adapter.name}`)
           select(selectedWallet.adapter.name)
           // Wait a bit for the wallet to be selected
-          await new Promise(resolve => setTimeout(resolve, 200))
+          await new Promise(resolve => setTimeout(resolve, 500))
         } else {
+          console.error(`Available wallets:`, wallets.map(w => w.adapter.name))
           throw new Error(`Wallet '${walletName}' not found or not supported`)
         }
       }
 
       // Check if wallet is available and installed
       if (wallet && wallet.readyState !== 'Installed') {
-        throw new Error(`${wallet.adapter.name} wallet is not installed. Please install it first.`)
+        console.error(`Wallet readyState: ${wallet.readyState}`)
+        throw new Error(`${wallet.adapter.name} wallet is not installed or ready. Please install it first and refresh the page.`)
       }
 
       // If no wallet is selected, throw an error
@@ -60,23 +66,27 @@ export function WalletConnectionProvider({ children }: { children: ReactNode }) 
         throw new Error("No wallet selected. Please select a wallet first.")
       }
 
+      console.log(`Attempting to connect to ${wallet.adapter.name}...`)
       await walletConnect()
       setStatus("connected")
 
       toast({
         title: "Wallet Connected",
-        description: "Your wallet has been connected successfully.",
+        description: `Successfully connected to ${wallet.adapter.name}.`,
       })
       
       return true
     } catch (err: any) {
       console.error("Wallet connection error:", err)
       setStatus("error")
-      setError(err instanceof Error ? err : new Error(err?.message || "Failed to connect wallet"))
+      
+      // Parse the error using utility function
+      const parsedError = parseWalletError(err)
+      setError(parsedError as any)
 
       toast({
         title: "Connection Failed",
-        description: err?.message || "Failed to connect wallet. Please make sure your wallet is installed and try again.",
+        description: parsedError.message,
         variant: "destructive",
       })
       
@@ -164,8 +174,8 @@ export function WalletConnectionProvider({ children }: { children: ReactNode }) 
       retry, 
       clearError, 
       isWalletAvailable, 
-      getRecommendedWallet, 
-      isBrowserSupported 
+        getRecommendedWallet: () => getRecommendedWallet() || getBrowserRecommendedWallet(), 
+  isBrowserSupported 
     }}>
       {children}
     </WalletConnectionContext.Provider>

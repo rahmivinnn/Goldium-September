@@ -44,12 +44,23 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
   const handleSelectWallet = async (walletName: string) => {
     setSelectedWallet(walletName)
     setIsConnecting(true)
+    clearError()
 
-    const success = await connect(walletName)
+    try {
+      // Check if wallet is installed before attempting connection
+      if (!isWalletAvailable(walletName.toLowerCase())) {
+        throw new Error(`${walletName} wallet is not installed. Please install it first.`)
+      }
 
-    if (success) {
-      onClose()
-    } else {
+      const success = await connect(walletName)
+
+      if (success) {
+        onClose()
+      } else {
+        setIsConnecting(false)
+      }
+    } catch (err: any) {
+      console.error("Wallet selection error:", err)
       setIsConnecting(false)
     }
   }
@@ -95,15 +106,27 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
   const walletOptions = [
     {
       name: "Phantom",
-      icon: "/phantom-icon.png", // You'll need to add this image
-      isAvailable: isWalletAvailable("Phantom"),
-      isRecommended: getRecommendedWallet() === "Phantom",
+      displayName: "Phantom",
+      icon: "🟣", // Using emoji as fallback
+      isAvailable: isWalletAvailable("phantom"),
+      isRecommended: getRecommendedWallet() === "phantom",
+      description: "A friendly crypto wallet built for DeFi & NFTs"
     },
     {
-      name: "Solflare",
-      icon: "/solflare-icon.png", // You'll need to add this image
-      isAvailable: isWalletAvailable("Solflare"),
-      isRecommended: getRecommendedWallet() === "Solflare",
+      name: "Solflare", 
+      displayName: "Solflare",
+      icon: "🔥", // Using emoji as fallback
+      isAvailable: isWalletAvailable("solflare"),
+      isRecommended: getRecommendedWallet() === "solflare",
+      description: "Powerful wallet for Solana ecosystem"
+    },
+    {
+      name: "Backpack",
+      displayName: "Backpack", 
+      icon: "🎒", // Using emoji as fallback
+      isAvailable: isWalletAvailable("backpack"),
+      isRecommended: getRecommendedWallet() === "backpack",
+      description: "Multi-chain crypto wallet"
     },
   ]
 
@@ -156,16 +179,16 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
                   <div className="flex items-start">
                     <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-medium">{error.message}</p>
-                      <p className="mt-1">{error.details}</p>
-                      {error.recoverySteps && (
+                      <p className="font-medium">{error.message || "Connection failed"}</p>
+                      {(error as any).details && <p className="mt-1">{(error as any).details}</p>}
+                      {(error as any).recoverySteps && (
                         <ul className="mt-2 list-disc list-inside">
-                          {error.recoverySteps.map((step, index) => (
+                          {(error as any).recoverySteps.map((step: string, index: number) => (
                             <li key={index}>{step}</li>
                           ))}
                         </ul>
                       )}
-                      {error.code === "wallet_not_found" && selectedWallet && (
+                      {((error as any).code === "WALLET_NOT_FOUND" || error.message?.includes("not installed")) && selectedWallet && (
                         <a
                           href={getWalletInstallLink(selectedWallet)}
                           target="_blank"
@@ -194,15 +217,15 @@ export default function ConnectWalletModal({ isOpen, onClose }: ConnectWalletMod
                   >
                     <div className="flex items-center">
                       <div className="w-8 h-8 mr-3 rounded-full bg-black/50 flex items-center justify-center overflow-hidden">
-                        {/* Replace with actual wallet icons */}
-                        <span className="text-xs">{wallet.name.charAt(0)}</span>
+                        <span className="text-lg">{wallet.icon}</span>
                       </div>
                       <div className="text-left">
                         <div className="font-medium">
-                          {wallet.name}
+                          {wallet.displayName}
                           {wallet.isRecommended && <span className="ml-2 text-xs text-gold">Recommended</span>}
                         </div>
-                        {!wallet.isAvailable && <div className="text-xs text-gray-500">Not installed</div>}
+                        <div className="text-xs text-gray-400">{wallet.description}</div>
+                        {!wallet.isAvailable && <div className="text-xs text-red-400">Not installed</div>}
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-500" />

@@ -45,7 +45,9 @@ declare global {
 export function isWalletInstalled(walletName: string): boolean {
   if (typeof window === "undefined") return false
 
-  switch (walletName.toLowerCase()) {
+  const normalizedName = walletName.toLowerCase()
+  
+  switch (normalizedName) {
     case "phantom":
       return !!window.solana?.isPhantom
     case "solflare":
@@ -63,12 +65,14 @@ export function isWalletInstalled(walletName: string): boolean {
  * Get all installed wallets
  */
 export function getInstalledWallets(): string[] {
+  if (typeof window === "undefined") return []
+  
   const wallets: string[] = []
 
   if (isWalletInstalled("phantom")) wallets.push("phantom")
   if (isWalletInstalled("solflare")) wallets.push("solflare")
-  if (isWalletInstalled("metamask")) wallets.push("metamask")
   if (isWalletInstalled("backpack")) wallets.push("backpack")
+  if (isWalletInstalled("metamask")) wallets.push("metamask")
 
   return wallets
 }
@@ -88,13 +92,11 @@ export function getRecommendedWallet(): string | null {
 
   if (installedWallets.length === 0) {
     // No wallets installed, recommend based on platform
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
-    if (isMobile) {
-      return "phantom" // Phantom has good mobile support
-    } else {
-      return "phantom" // Phantom is popular on desktop
+    if (typeof navigator !== "undefined") {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      return isMobile ? "phantom" : "phantom"
     }
+    return "phantom"
   }
 
   // Prioritize wallets in this order
