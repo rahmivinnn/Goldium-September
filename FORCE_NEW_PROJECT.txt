@@ -1,0 +1,22 @@
+FORCE NEW VERCEL PROJECT - EGG CHARACTERS
+========================================
+
+🥚 PROJECT NAME: goldium-september-egg-characters
+🎯 VERSION: 2.0.0-egg-characters
+⏰ TIMESTAMP: 1756708600
+
+THIS IS A COMPLETELY NEW PROJECT SETUP TO FORCE VERCEL RECOGNITION
+
+FEATURES:
+✅ Updated package.json name and version
+✅ Modified next.config.mjs with force rebuild
+✅ Added deployment markers and build IDs
+✅ Complete egg character system
+✅ SplashScreen with K2, K4, K6, K3, K1
+✅ EggNFTCard interactive system
+✅ All animations and effects
+
+TARGET: https://goldium-september.vercel.app/
+BACKUP: https://goldium-september-egg-characters.vercel.app/
+
+FORCE DEPLOY: MAXIMUM PRIORITY

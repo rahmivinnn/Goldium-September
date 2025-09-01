@@ -1,37 +1,35 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
+  // Force new deployment recognition
+  generateBuildId: async () => {
+    return `egg-characters-${Date.now()}`
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  
+  // Ensure static export works
+  output: 'standalone',
+  
+  // Optimize images
   images: {
     unoptimized: true,
+    domains: ['localhost', 'vercel.app', 'goldium-september.vercel.app']
   },
-  // Netlify configuration
-  trailingSlash: true,
-  // Disable features that don't work with static export
-  experimental: {
-    // Remove any experimental features that require server
+  
+  // Force Vercel to recognize changes
+  env: {
+    DEPLOYMENT_VERSION: 'egg-characters-latest',
+    BUILD_TIME: new Date().toISOString()
   },
-  webpack: (config, { isServer }) => {
-    // Fix for pino-pretty
-    if (isServer) {
-      config.externals.push('pino-pretty');
-    }
-    
-    // Fix for client-side wallet adapters
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
-    
-    return config;
-  },
+  
+  // Webpack config to force rebuild
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Force rebuild by adding deployment marker
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env.DEPLOYMENT_MARKER': JSON.stringify(`egg-chars-${Date.now()}`)
+      })
+    )
+    return config
+  }
 }
 
-export default nextConfig;
+export default nextConfig
