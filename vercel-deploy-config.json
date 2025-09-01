@@ -1,0 +1,21 @@
+{
+  "name": "goldium-september",
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SOLANA_NETWORK": "mainnet-beta",
+    "NEXT_PUBLIC_SOLANA_RPC_URL": "https://api.mainnet-beta.solana.com"
+  },
+  "regions": ["sin1", "hnd1", "iad1"]
+}
