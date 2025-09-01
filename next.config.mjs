@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
+const NUCLEAR_DEPLOYMENT = require('./NUCLEAR_DEPLOYMENT.js')
+
 const nextConfig = {
-  // Force new deployment recognition
+  // NUCLEAR FORCE: Generate unique build ID
   generateBuildId: async () => {
-    return `egg-characters-${Date.now()}`
+    return `NUCLEAR-EGG-CHARS-${Date.now()}`
   },
   
   // Ensure static export works
@@ -14,10 +16,12 @@ const nextConfig = {
     domains: ['localhost', 'vercel.app', 'goldium-september.vercel.app']
   },
   
-  // Force Vercel to recognize changes
+  // NUCLEAR FORCE: Environment variables
   env: {
-    DEPLOYMENT_VERSION: 'egg-characters-latest',
-    BUILD_TIME: new Date().toISOString()
+    DEPLOYMENT_VERSION: 'NUCLEAR-EGG-CHARACTERS-LATEST',
+    BUILD_TIME: new Date().toISOString(),
+    NUCLEAR_DEPLOYMENT_ID: `nuclear-${Date.now()}`,
+    EGG_CHARACTERS_VERSION: '2.0.0-NUCLEAR'
   },
   
   // Webpack config to force rebuild
