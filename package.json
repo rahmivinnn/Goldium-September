@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "push": "./auto-push.sh",
+    "watch-push": "./watch-and-push.sh",
     "clean": "rm -rf .next out",
     "postinstall": "pnpm approve-builds",
     "export": "next export",
