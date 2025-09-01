@@ -182,3 +182,28 @@ export async function getLiquidityPools(mintAddress?: string) {
   
   return pools
 }
+
+// Get token price history (mock data for now)
+export async function getTokenPriceHistory(mintAddress: string, timeframe: string = '24h') {
+  // Mock price history data
+  const now = Date.now()
+  const points = timeframe === '24h' ? 24 : timeframe === '7d' ? 7 : 30
+  const interval = timeframe === '24h' ? 3600000 : timeframe === '7d' ? 86400000 : 86400000 * 30
+  
+  const priceHistory = []
+  const basePrice = 0.025 // Base price for GOLD token
+  
+  for (let i = points; i >= 0; i--) {
+    const timestamp = now - (i * interval)
+    const variation = (Math.random() - 0.5) * 0.002 // ±0.002 variation
+    const price = basePrice + variation
+    
+    priceHistory.push({
+      timestamp,
+      price: Math.max(0.001, price), // Minimum price
+      volume: Math.random() * 10000 + 1000
+    })
+  }
+  
+  return priceHistory
+}

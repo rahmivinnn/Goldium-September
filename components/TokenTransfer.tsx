@@ -647,4 +647,3 @@ export default function TokenTransfer() {
   )
 }
 
-export default TokenTransfer

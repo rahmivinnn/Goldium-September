@@ -27,7 +27,7 @@ export default function PoolsPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [expandedPool, setExpandedPool] = useState<string | null>(null)
 
-  const filteredPools = activeTab === "my" ? POOLS.filter((pool) => pool.myLiquidity > 0) : POOLS
+  const filteredPools = activeTab === "my" ? mockPools.filter((pool) => pool.myLiquidity > 0) : mockPools
 
   const togglePoolExpand = (poolId: string) => {
     setExpandedPool(expandedPool === poolId ? null : poolId)

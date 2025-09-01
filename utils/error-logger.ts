@@ -1,4 +1,5 @@
-type ErrorSeverity = "low" | "medium" | "high" | "critical"
+export type ErrorSeverity = "low" | "medium" | "high" | "critical"
+export type ErrorCategory = "wallet" | "transaction" | "network" | "ui" | "api" | "unknown"
 
 interface ErrorLogContext {
   component?: string
@@ -6,22 +7,62 @@ interface ErrorLogContext {
   data?: Record<string, any>
   severity?: ErrorSeverity
   userId?: string
+  category?: ErrorCategory
 }
+
+interface ErrorLog {
+  id: string
+  timestamp: string
+  message: string
+  severity: ErrorSeverity
+  category: ErrorCategory
+  context: ErrorLogContext
+}
+
+// In-memory error storage (in production, use a proper logging service)
+let errorLogs: ErrorLog[] = []
 
 /**
  * Logs application errors with context
  */
 export function logAppError(error: Error, context: ErrorLogContext = {}): void {
-  const { component = "unknown", action = "unknown", data = {}, severity = "medium", userId = "anonymous" } = context
+  const { 
+    component = "unknown", 
+    action = "unknown", 
+    data = {}, 
+    severity = "medium", 
+    userId = "anonymous",
+    category = "unknown"
+  } = context
+
+  const errorLog: ErrorLog = {
+    id: Math.random().toString(36).substr(2, 9),
+    timestamp: new Date().toISOString(),
+    message: error.message,
+    severity,
+    category,
+    context: { component, action, data, userId }
+  }
+
+  errorLogs.push(errorLog)
+
+  // Keep only last 100 errors in memory
+  if (errorLogs.length > 100) {
+    errorLogs = errorLogs.slice(-100)
+  }
 
   // In a real app, you might send this to a logging service
   console.error(`[${severity.toUpperCase()}] Error in ${component} during ${action}:`, error.message, {
     stack: error.stack,
     userId,
-    timestamp: new Date().toISOString(),
+    timestamp: errorLog.timestamp,
+    category,
     ...data,
   })
 }
+
+// Export alias for compatibility
+export const logError = logAppError
 
 /**
  * Logs user actions for analytics
@@ -78,4 +119,18 @@ export function createSafeErrorHandler(
       }
     }
   }
+}
+
+/**
+ * Get all error logs
+ */
+export function getErrorLogs(): ErrorLog[] {
+  return [...errorLogs]
+}
+
+/**
+ * Clear all error logs
+ */
+export function clearErrorLogs(): void {
+  errorLogs = []
 }

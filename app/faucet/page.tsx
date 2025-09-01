@@ -1,4 +1,4 @@
-import { Faucet } from "@/components/Faucet"
+import Faucet from "@/components/Faucet"
 import type { Metadata } from "next"
 import PageLayout from "@/components/PageLayout"
 
